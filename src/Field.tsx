@@ -40,8 +40,6 @@ const Field = function Field() {
 		reset();
 	};
 
-	console.log(count);
-
 	const handleSetToField = (x: number, y: number) => {
 		if (field[x][y]) return;
 
@@ -51,7 +49,7 @@ const Field = function Field() {
 		);
 
 		setField(newField);
-		checkWin(newField, size, lineLength, [x, y])
+		checkWin(newField, lineLength, [x, y])
 			? setWinner(activePlayer)
 			: setActivePlayer(getNextPlayer(players, activePlayer));
 
@@ -113,7 +111,6 @@ const Field = function Field() {
 
 		setErrors(newErrors);
 	}, [size]);
-	console.log('render');
 	return (
 		<div className="root">
 			<View

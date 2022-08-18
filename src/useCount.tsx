@@ -7,8 +7,6 @@ export const useCount = function useCountHook({ size }: { size: number }) {
 	const [isFinished, setIsFinished] = useState(false);
 	const maxCounts = Number(size) ** 2 || BASE_MAX_COUNT;
 
-	console.log(maxCounts, size, isFinished);
-
 	const next = () => {
 		setCount((prev) => prev + 1);
 		if (count === maxCounts) {

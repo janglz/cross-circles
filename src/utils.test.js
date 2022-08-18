@@ -1,4 +1,3 @@
-// const checkWin = require('./utils');
 import { checkWin, findMaxRepeatsCount } from './utils'
 
 test('mustWin', () => {

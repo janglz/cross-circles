@@ -31,26 +31,20 @@ const findMaxRepeatsCount = (arr: Array<any>) => {
 
 export const checkWin = (
 	field: Array<Array<string>>,
-	size: number,
 	lineLength: number,
 	coords: Array<number>
 ) => {
-	// const resultMatrix = matrix.reduce((acc, curr, i) => ,[])
 	const [x, y] = coords;
-	const horizontal = field[x]; //.slice(y - lineLength, y + lineLength);
+	const horizontal = field[x];
 	if (findMaxRepeatsCount(horizontal) >= lineLength) return true;
+
 	const vertical = field.map((el) => el[y]);
-	//.slice(x - lineLength, x + lineLength);
 	if (findMaxRepeatsCount(vertical) >= lineLength) return true;
 
-	const leftToDown = field.map((el, i) => {
-		return el[i + y - x];
-	});
+	const leftToDown = field.map((el, i) => el[i + y - x]);
 	if (findMaxRepeatsCount(leftToDown) >= lineLength) return true;
 
-	const leftToUp = field.map((el, i) => {
-		return el[x + y - i];
-	});
+	const leftToUp = field.map((el, i) => el[x + y - i]);
 	if (findMaxRepeatsCount(leftToUp) >= lineLength) return true;
 
 	return false;

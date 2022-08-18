@@ -48,7 +48,7 @@ module.exports = {
   },
   plugins: [new HtmlWebpackPlugin({
     template: "index.html",
-    hash: true, // Cache busting
+    hash: true,
     filename: '../dist/index.html'
   })]
 };
