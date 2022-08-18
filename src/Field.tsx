@@ -10,6 +10,9 @@ const getNextPlayer = (players: Array<string>, activePlayer: string) => {
 	return players[0];
 };
 
+const getDefaultNames = (players: Array<string>) =>
+	players.map((player, i) => player || `player ${i + 1}`);
+
 const validateSize = (string: string | number) =>
 	Number(string) >= 3 && Number(string) <= 10;
 
@@ -28,7 +31,7 @@ const Field = function Field() {
 	const [winner, setWinner] = useState<string | null>(null);
 
 	const handleReset = () => {
-		setActivePlayer(players[0]);
+		setActivePlayer(() => players[0]);
 		setField(generateField(size));
 		setIsGameStarted(false);
 		setWinner(null);
@@ -62,6 +65,8 @@ const Field = function Field() {
 
 	const handleStartGame = () => {
 		setField(generateField(size));
+		setPlayers(() => getDefaultNames(players));
+		setActivePlayer(() => players[0]);
 		setIsGameStarted(true);
 	};
 
