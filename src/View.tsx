@@ -1,4 +1,7 @@
-import React, { MouseEvent, SyntheticEvent, useState } from 'react';
+import React, { SyntheticEvent, useEffect } from 'react';
+import cx from 'classnames';
+import Error from './Error';
+import styles from './styles.scss';
 
 const View = function View({
 	field,
@@ -6,12 +9,15 @@ const View = function View({
 	activePlayer,
 	onSet,
 	size,
+	lineLength,
 	winner,
 	onStart,
 	onSetSize,
+	onSetLineLength,
 	isGameStarted,
 	onSetPlayers,
 	onReload,
+	errors,
 }: {
 	field: Array<Array<string>>;
 	players: Array<string>;
@@ -20,38 +26,58 @@ const View = function View({
 	onSet: (x: number, y: number) => void;
 	onSetPlayers: (players: Array<string>) => void;
 	onStart: () => void;
-	onSetSize: (e: React.FormEvent<HTMLInputElement>) => void;
+	onSetSize: (e: React.ChangeEvent<HTMLInputElement>) => void;
+	onSetLineLength: (e: React.ChangeEvent<HTMLInputElement>) => void;
 	onReload: () => void;
 	size: number;
+	lineLength: number;
 	isGameStarted: boolean;
+	errors: { size?: boolean; length?: boolean };
 }) {
 	const handleClick = (x: number, y: number) => (e: SyntheticEvent) => {
-		e.preventDefault();
 		onSet(x, y);
 	};
 
 	const handlePlayerNameChange =
-		(num: number) => (e: React.FormEvent<HTMLInputElement>) => {
+		(num: number) => (e: React.ChangeEvent<HTMLInputElement>) => {
 			const newNames = players.map((el, i) =>
-				i === num ? e.currentTarget.value : el
+				i === num ? e.target.value : el
 			);
 			onSetPlayers(newNames);
 		};
 
+	const isGameDisabled = errors.size || errors.length;
+
 	return (
-		<div>
+		<div className={styles.wrapper}>
 			{!isGameStarted && (
-				<div>
+				<div className={styles.box}>
 					<label>
 						размер поля (3-10 клеток)
-						<input type="text" onChange={onSetSize} value={size}></input>
+						<input
+							type="text"
+							onChange={onSetSize}
+							value={size}
+							className={cx({ [styles.error]: errors.size })}
+						></input>
+						{errors.size && <Error type="size" />}
+					</label>
+					<label>
+						длина линии для победы
+						<input
+							type="text"
+							onChange={onSetLineLength}
+							value={lineLength}
+							className={cx({ [styles.error]: errors.length })}
+						></input>
+						{errors.length && <Error type="length" />}
 					</label>
 					<label>
 						имя игрока 1
 						<input
 							type="text"
 							onChange={handlePlayerNameChange(0)}
-							defaultValue={players[0]}
+							value={players[0]}
 						></input>
 					</label>
 					<label>
@@ -59,35 +85,54 @@ const View = function View({
 						<input
 							type="text"
 							onChange={handlePlayerNameChange(1)}
-							defaultValue={players[1]}
+							value={players[1]}
 						></input>
 					</label>
-					<button onClick={onStart}>начать</button>
+					<button
+						className={styles.button}
+						onClick={onStart}
+						disabled={isGameDisabled}
+					>
+						начать
+					</button>
 				</div>
 			)}
 			{isGameStarted && (
-				<div>
+				<div className={styles.box}>
 					<div>{activePlayer && `ход игрока ${activePlayer}`}</div>
-					<div>{winner && `победил ${winner}`}</div>
+					{winner && (
+						<div className={cx(styles.winner)}>
+							<span>победил {winner}</span>
+						</div>
+					)}
 					{field.map((row, i) => (
-						<div key={`row_${i}`}>
+						<div key={`row_${i}`} className={styles.row}>
 							{row.map((element, k) => (
-								<button
-									disabled={Boolean(winner)}
-									key={`el_${k}`}
-									type="button"
-									onClick={handleClick(i, k)}
-								>
-									{element}
-								</button>
+								<div className={styles.cell} key={`el_${k}`}>
+									<button
+										className={styles.cellButton}
+										disabled={Boolean(winner)}
+										type="button"
+										onClick={handleClick(i, k)}
+									>
+										<span>{element}</span>
+									</button>
+								</div>
 							))}
 						</div>
 					))}
 				</div>
 			)}
 
-			<div>
-				<button onClick={onReload}>сбросить и начать заново</button>
+			<div className={styles.center}>
+				<button
+					className={cx(styles.button, styles.buttonCancel, {
+						[styles.hasWin]: Boolean(winner),
+					})}
+					onClick={onReload}
+				>
+					сбросить и начать заново
+				</button>
 			</div>
 		</div>
 	);

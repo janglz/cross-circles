@@ -6,13 +6,6 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        use: {
-          loader: "babel-loader"
-        }
-      },
-      {
         test: /\.tsx?$/,
         use: 'ts-loader',
         exclude: /node_modules/,
@@ -47,13 +40,6 @@ module.exports = {
     open: true,
     hot: true,
     historyApiFallback: true,
-    proxy: {
-      '/api': {
-        target: 'https://ap-term.mixxxtress.ru',
-        secure: false,
-        changeOrigin: true,
-      }
-    }
   },
   output: {
     filename: 'bundle.js',
