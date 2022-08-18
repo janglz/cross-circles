@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import View from './View';
 import { checkWin } from './utils';
+import { useCount } from './useCount';
 
 const generateField = (num: number) =>
 	new Array(num).fill(new Array(num).fill(null));
@@ -22,20 +23,24 @@ const validateLength = (length: string | number, size: number | string) =>
 const Field = function Field() {
 	const [players, setPlayers] = useState(['player 1', 'player 2']);
 	const [activePlayer, setActivePlayer] = useState(players[0]);
-	const [size, setSize] = useState(5);
+	const [size, setSize] = useState(3);
 	const [lineLength, setLineLength] = useState(3);
 	const [isGameStarted, setIsGameStarted] = useState(false);
 	const [errors, setErrors] = useState({});
 	const [field, setField] = useState(generateField(size));
 
 	const [winner, setWinner] = useState<string | null>(null);
+	const { next, isFinished, reset, count } = useCount({ size });
 
 	const handleReset = () => {
 		setActivePlayer(() => players[0]);
 		setField(generateField(size));
 		setIsGameStarted(false);
 		setWinner(null);
+		reset();
 	};
+
+	console.log(count);
 
 	const handleSetToField = (x: number, y: number) => {
 		if (field[x][y]) return;
@@ -49,6 +54,8 @@ const Field = function Field() {
 		checkWin(newField, size, lineLength, [x, y])
 			? setWinner(activePlayer)
 			: setActivePlayer(getNextPlayer(players, activePlayer));
+
+		next();
 	};
 
 	const handleSetSize = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,10 +113,11 @@ const Field = function Field() {
 
 		setErrors(newErrors);
 	}, [size]);
-
+	console.log('render');
 	return (
 		<div className="root">
 			<View
+				isFinished={isFinished}
 				field={field}
 				errors={errors}
 				activePlayer={activePlayer}

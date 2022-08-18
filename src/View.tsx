@@ -1,4 +1,4 @@
-import React, { SyntheticEvent, useEffect } from 'react';
+import React, { SyntheticEvent, useEffect, useState } from 'react';
 import cx from 'classnames';
 import Error from './Error';
 import styles from './styles.scss';
@@ -18,7 +18,9 @@ const View = function View({
 	onSetPlayers,
 	onReload,
 	errors,
+	isFinished,
 }: {
+	isFinished: boolean;
 	field: Array<Array<string>>;
 	players: Array<string>;
 	activePlayer: string;
@@ -34,6 +36,7 @@ const View = function View({
 	isGameStarted: boolean;
 	errors: { size?: boolean; length?: boolean };
 }) {
+	const [modal, setModal] = useState(true);
 	const handleClick = (x: number, y: number) => (e: SyntheticEvent) => {
 		onSet(x, y);
 	};
@@ -48,40 +51,39 @@ const View = function View({
 
 	const isGameDisabled = errors.size || errors.length;
 
+	const isBigCells = field.length < 6;
+
+	useEffect(() => setModal(true), [isGameStarted]);
+
 	return (
 		<div className={styles.wrapper}>
+			{!isGameStarted && <div className={styles.tip}>Настройки игры</div>}
 			{!isGameStarted && (
 				<div className={styles.box}>
-					<label>
-						размер поля (3-10 клеток)
-						<input
-							type="text"
-							onChange={onSetSize}
-							value={size}
-							className={cx({ [styles.error]: errors.size })}
-						></input>
+					<label className={styles.label}>
+						<span>Размер поля (3-10 клеток)</span>
+						<input type="text" onChange={onSetSize} value={size}></input>
 						{errors.size && <Error type="size" />}
 					</label>
-					<label>
-						длина линии для победы
+					<label className={styles.label}>
+						<span>Длина линии для победы</span>
 						<input
 							type="text"
 							onChange={onSetLineLength}
 							value={lineLength}
-							className={cx({ [styles.error]: errors.length })}
 						></input>
 						{errors.length && <Error type="length" />}
 					</label>
-					<label>
-						имя игрока 1
+					<label className={styles.label}>
+						<span>Имя игрока 1</span>
 						<input
 							type="text"
 							onChange={handlePlayerNameChange(0)}
 							value={players[0]}
 						></input>
 					</label>
-					<label>
-						имя игрока 2
+					<label className={styles.label}>
+						<span>Имя игрока 2</span>
 						<input
 							type="text"
 							onChange={handlePlayerNameChange(1)}
@@ -98,19 +100,43 @@ const View = function View({
 				</div>
 			)}
 			{isGameStarted && (
+				<div className={styles.tip}>
+					{!isFinished && activePlayer && `Ход игрока ${activePlayer}`}
+					{isFinished && 'Игра окончена'}
+				</div>
+			)}
+			{isGameStarted && (
 				<div className={styles.box}>
-					<div>{activePlayer && `ход игрока ${activePlayer}`}</div>
-					{winner && (
+					{winner && modal && (
 						<div className={cx(styles.winner)}>
-							<span>победил {winner}</span>
+							<span>Победил {winner}</span>
+							<button type="button" onClick={() => setModal(false)}>
+								x
+							</button>
 						</div>
 					)}
+					{isFinished && !winner && modal && (
+						<div className={cx(styles.winner)}>
+							<span>Ничья!</span>
+							<button type="button" onClick={() => setModal(false)}>
+								x
+							</button>
+						</div>
+					)}
+
 					{field.map((row, i) => (
 						<div key={`row_${i}`} className={styles.row}>
 							{row.map((element, k) => (
-								<div className={styles.cell} key={`el_${k}`}>
+								<div
+									className={cx(styles.cell, {
+										[styles.cellBig]: isBigCells,
+									})}
+									key={`el_${k}`}
+								>
 									<button
-										className={styles.cellButton}
+										className={cx(styles.cellButton, {
+											[styles.cellBig]: isBigCells,
+										})}
 										disabled={Boolean(winner)}
 										type="button"
 										onClick={handleClick(i, k)}
@@ -124,7 +150,7 @@ const View = function View({
 				</div>
 			)}
 
-			<div className={styles.center}>
+			<div className={cx(styles.center, styles.bottom)}>
 				<button
 					className={cx(styles.button, styles.buttonCancel, {
 						[styles.hasWin]: Boolean(winner),
