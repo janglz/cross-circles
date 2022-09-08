@@ -2,6 +2,7 @@ import React, { SyntheticEvent, useEffect, useState } from 'react';
 import cx from 'classnames';
 import Error from './Error';
 import styles from './styles.scss';
+import Modal from './Modal';
 
 const View = function View({
 	field,
@@ -34,9 +35,9 @@ const View = function View({
 	size: number;
 	lineLength: number;
 	isGameStarted: boolean;
-	errors: { size?: boolean; length?: boolean };
+	errors: { size?: boolean; length?: boolean; name?: boolean };
 }) {
-	const [modal, setModal] = useState(true);
+	const [showModal, setShowModal] = useState(true);
 	const handleClick = (x: number, y: number) => (e: SyntheticEvent) => {
 		onSet(x, y);
 	};
@@ -49,11 +50,13 @@ const View = function View({
 			onSetPlayers(newNames);
 		};
 
-	const isGameDisabled = errors.size || errors.length;
+	const isGameDisabled = Boolean(
+		Object.values(errors).filter((el) => el).length
+	);
 
 	const isBigCells = field.length < 6;
 
-	useEffect(() => setModal(true), [isGameStarted]);
+	useEffect(() => setShowModal(true), [isGameStarted]);
 
 	return (
 		<div className={styles.wrapper}>
@@ -81,6 +84,7 @@ const View = function View({
 							onChange={handlePlayerNameChange(0)}
 							value={players[0]}
 						></input>
+						{errors.name && <Error type="name" />}
 					</label>
 					<label className={styles.label}>
 						<span>Имя игрока 2</span>
@@ -89,6 +93,7 @@ const View = function View({
 							onChange={handlePlayerNameChange(1)}
 							value={players[1]}
 						></input>
+						{errors.name && <Error type="name" />}
 					</label>
 					<button
 						className={styles.button}
@@ -107,21 +112,12 @@ const View = function View({
 			)}
 			{isGameStarted && (
 				<div className={styles.box}>
-					{winner && modal && (
-						<div className={cx(styles.winner)}>
-							<span>Победил {winner}</span>
-							<button type="button" onClick={() => setModal(false)}>
-								x
-							</button>
-						</div>
-					)}
-					{isFinished && !winner && modal && (
-						<div className={cx(styles.winner)}>
-							<span>Ничья!</span>
-							<button type="button" onClick={() => setModal(false)}>
-								x
-							</button>
-						</div>
+					{showModal && (
+						<Modal
+							winner={winner}
+							setModal={setShowModal}
+							isFinished={isFinished}
+						/>
 					)}
 
 					{field.map((row, i) => (
