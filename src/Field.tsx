@@ -20,6 +20,9 @@ const validateSize = (string: string | number) =>
 const validateLength = (length: string | number, size: number | string) =>
 	Number(length) >= 3 && Number(length) <= Number(size);
 
+const validatePlayersNames = (players: Array<string>) =>
+	players[0] !== players[1];
+
 const Field = function Field() {
 	const [players, setPlayers] = useState(['player 1', 'player 2']);
 	const [activePlayer, setActivePlayer] = useState(players[0]);
@@ -30,7 +33,7 @@ const Field = function Field() {
 	const [field, setField] = useState(generateField(size));
 
 	const [winner, setWinner] = useState<string | null>(null);
-	const { next, isFinished, reset, count } = useCount({ size });
+	const { next, isFinished, reset } = useCount({ size });
 
 	const handleReset = () => {
 		setActivePlayer(() => players[0]);
@@ -75,7 +78,15 @@ const Field = function Field() {
 		setIsGameStarted(true);
 	};
 
-	const handleSetPlayers = (players: string[]) => setPlayers(() => players);
+	const handleSetPlayers = (players: string[]) => {
+		const isValid = validatePlayersNames(players);
+		if (!isValid) {
+			setErrors((prev) => ({ ...prev, name: true }));
+			return;
+		}
+		setPlayers(() => players);
+		setErrors((prev) => ({ ...prev, name: false }));
+	};
 
 	useEffect(() => {
 		const isValidLength = validateLength(lineLength, size);
@@ -111,6 +122,7 @@ const Field = function Field() {
 
 		setErrors(newErrors);
 	}, [size]);
+
 	return (
 		<div className="root">
 			<View
